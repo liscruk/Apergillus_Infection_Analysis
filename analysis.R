@@ -267,8 +267,6 @@ ggplot(h[1:20,],aes(reorder(Description,NES),NES))+
   
 dev.off()
 
-
-###
 library(httr);library(jsonlite)
 ### Get raw list of targets
 ### IRF1
@@ -313,7 +311,7 @@ ovres = list()
 for (z in 1:length(tfs)) {
 
   print(z)
-  fcs = seq(1,7, by = 0.05)
+  fcs = seq(1,max(res$logFC), by = 0.05)
   odds = c()
   ins = c()
   pval = c()
@@ -322,7 +320,7 @@ for (z in 1:length(tfs)) {
   
   for (i in fcs) {
     
-    a = res[with(res,logFC>i & FDR<0.1),]
+    a = res[with(res,logFC>i & FDR<0.05),]
     b = tfs[[z]]
     a = a$GENENAME
     
@@ -359,22 +357,17 @@ for (z in 1:length(tfs)) {
 tfdf = do.call(rbind,ovres)
 
 
-ggplot(tfdf,aes(-log10(pval),odds))+
+ggplot(tfdf,aes(-log10(padjust),odds))+
   geom_point(aes(size = ins,color = lfc))+
-  geom_vline(xintercept = -log10(0.05),linetype = "longdash", color = "grey")+
-  geom_smooth()+
+  geom_vline(xintercept = -log10(0.05),linetype = "longdash", color = "black")+
+  geom_hline(yintercept = 1, linetype = "longdash", color = "black")+
+  geom_smooth(se=FALSE)+
   scale_colour_gradient(low = "blue", high="red")+
   ggtitle("Overlapps")+
   theme(axis.text = element_text(color = "black", size = 16))+
   theme_bw()+
   facet_wrap(~tf)
 
-
- ### Density 
-ggplot(tfres,aes(ins,odds, group = tf))+
-  geom_point()+
-  facet_wrap(~tf)+
-  theme_bw()
 
 
 
